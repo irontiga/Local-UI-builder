@@ -1,6 +1,7 @@
 ### Bower ###
-bower_components
+bower_components/
 .bower-cache
 .bower-registry
 .bower-tmp
-client/bower_components
+client/bower_components/
+node_modules/
