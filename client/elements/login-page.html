@@ -1,55 +1,109 @@
 <link rel="import" href="/client/bower_components/polymer/polymer.html">
 
-<script src="/client/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-
 <link rel="import" href="/client/bower_components/paper-input/paper-input.html">
 <link rel="import" href="/client/bower_components/paper-card/paper-card.html">
 <link rel="import" href="/client/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="/client/bower_components/paper-button/paper-button.html">
 <link rel="import" href="/client/bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="/client/bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="/client/bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="/client/bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="/client/bower_components/paper-item/paper-item.html">
+<link rel="import" href="/client/bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="/client/bower_components/neon-animation/web-animations.html">
+<link rel="import" href="/client/bower_components/paper-progress/paper-progress.html">
 
 <link rel="import" href="/client/styles/app-theme.html">
 
 
 <dom-module id="login-page">
     
-    <style is="custom-style"  include="burst-styles iron-flex iron-flex-alignment iron-positioning iron-flex-factors">
-        #login-container{
-            position:absolute;
-            width:100%;
-            height:100%;
-            background: var(--primary-color);
-            z-index:3;
-        }
-        :root{
-            --paper-button-ink-color: var(--dark-accent-color)
-        }
-        paper-progress{
-            z-index:4;
-            width:100%;
-            --paper-progress-active-color: var(--accent-color);
-            --paper-progress-container-color: var(--primary-color);
-        }
-        paper-spinner{
-            z-index:4;
-        }
-    </style>
-    
     <template>
+        <style is="custom-style"  include="burst-styles iron-flex iron-flex-alignment iron-positioning iron-flex-factors">
+            #login-container{
+                position:absolute;
+                width:100%;
+                height:100%;
+                background: var(--primary-color);
+                z-index:3;
+            }
+            :root{
+                --paper-button-ink-color: var(--dark-accent-color)
+            }
+            paper-progress{
+                z-index:4;
+                width:100%;
+                --paper-progress-active-color: var(--accent-color);
+                --paper-progress-container-color: var(--primary-color);
+            }
+            paper-spinner{
+                z-index:4;
+            }
+            .show-advanced{
+                text-align:right;
+                padding:14px 0 0 0;
+            }
+            .show-advanced a{
+                cursor: pointer;
+                color: var(--accent-color);
+            }
+            .error-message{
+                width:100%;
+                text-align: right;
+                color: var(--paper-red-500)
+            }
+            paper-button[disabled]{
+                background: transparent;
+            }
+        </style>
         <template is="dom-if" if="{{!loginpage.loggedin}}">
             <div id="login-container" class="layout vertical center-justified">
                 <!--<div class="layout horizontal center-justified">
                     <paper-spinner active></paper-spinner>
                 </div>-->
                 <div class="layout horizontal center-justified">
-                    <paper-card heading="Login">
-                        <!--<paper-progress indeterminate></paper-progress>-->
+                    <paper-card heading="Qora login" style="min-width:350px;">
+                        <template is="dom-if" if="{{loginpage.loading}}">
+                            <paper-progress indeterminate></paper-progress>
+                        </template>
                         <div class="card-content">
-                            <paper-input char-counter label="Passphrase" type="password" id="passphrase"></paper-input>
+                            
+                            <span class="error-message">{{loginpage.errorMessage}}</span>
+                            <paper-input char-counter label="Passphrase" type="password" id="passphrase" autofocus on-keydown="_keyDown"></paper-input>
+                            
+                            <template is="dom-if" if="{{!loginpage.loading}}">
+                                <div class="show-advanced">
+                                    <a on-tap="_showAdvanced"><small>Advanced</small></a>
+                                </div>
+
+
+                                <iron-collapse id="advanced">
+                                    <div>
+                                        <h4>Node options</h4>
+
+                                        <div class="layout horizontal">
+                                            <paper-input label="Protocol(http/https)" type="text" value="{{node.protocol}}"></paper-input>
+                                            <paper-input label="Node URL" type="text" value="{{node.url}}"></paper-input>
+                                            <paper-input label="Explorer Port" type="number" value="{{node.explorerPort}}"></paper-input>
+                                            <paper-input label="API Port" type="number" value="{{node.apiPort}}"></paper-input>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4>Wallet options</h4>
+                                        <paper-input label="Number of addresses" type="number" value="{{addressCount}}"></paper-input>
+                                    </div>
+                                </iron-collapse>
+                            </template>
+                            
+                            
+<!--
+<paper-input label="Protocl" type="text" value="{{node.protocol}}"></paper-input>
+<paper-input label="Node URL" type="text" value="{{node.url}}"></paper-input>
+<paper-input label="Port" type="number" value="{{node.port}}"></paper-input>
+-->
                         </div>
                         <div class="card-actions">
-                            <paper-button>New Account</paper-button>
+                            <paper-button disabled>New Account</paper-button>
                             <paper-button style="float:right" on-tap="_loginClick">Login</paper-button>
                         </div>
                     </paper-card>
@@ -60,19 +114,47 @@
     
     <script src="/client/js/helpers.js"></script>
     <script>
-        Burst = new BurstHelper();
+        parentWindow = new ParentHelper();
         
         Polymer({
             is: "login-page",
             properties: {
                 loginpage: {
                     type: Object
+                },
+                node:{
+                    type: Object,
+                    notify: true
+                },
+                addressCount: {
+                    type: Number,
+                    notify: true
+                }
+            },
+            _showAdvanced: function(){
+                this.$$("#advanced").toggle();
+                /*
+                var moreInfo = document.getElementById('more-info');
+                var iconButton = Polymer.dom(event).localTarget;
+                iconButton.icon = moreInfo.opened ? 'hardware:keyboard-arrow-down' : 'hardware:keyboard-arrow-up';
+                moreInfo.toggle();
+                */
+            },
+            _keyDown: function(e){
+                if (e.keyCode === 13) {
+                    this._loginClick();
                 }
             },
             _loginClick : function(){
                 var passphrase = this.$$("#passphrase").value;
-                console.log(passphrase);
-                this.loginpage.login(passphrase);
+                //console.log(passphrase);
+                console.log(this.node);
+                if(passphrase == undefined){return;}
+                if(passphrase.length == 0){return;}
+                if(passphrase.length < 12){
+                    //...no no no, bad idea bro
+                }
+                this.loginpage.login(passphrase, this.shadowRoot.querySelector('#passphrase'));
                 //this.passphrase = this.$$("#passphrase").value
             }
         });

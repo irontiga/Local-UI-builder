@@ -3,6 +3,7 @@ const Hapi = require('hapi');
 const Inert = require('inert');
 const Nes = require('nes');
 const routes = require('./routes');
+const h2o2 = require('h2o2')
 
 const server = new Hapi.Server({
 	connections: {
@@ -16,6 +17,7 @@ const server = new Hapi.Server({
 server.connection({ port: 3000 });
 
 server.register(Inert, () => {});
+server.register(h2o2, () => {});
 
 
 

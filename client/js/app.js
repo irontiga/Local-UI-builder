@@ -11,7 +11,8 @@ Polymer({
 			value: []
 		},
         routeData: {
-            type: Object
+            type: Object,
+            value:{}
         },
 		route: {
 			type: Object
@@ -20,6 +21,7 @@ Polymer({
             type: Object,
             value: {
                 loggedin : false,
+                loading: false
             }
         },
 		data: {
@@ -39,22 +41,54 @@ Polymer({
             type: String,
             value: ""
         },
+        qoraNode: {
+            type: Object,
+            value: {
+                protocol: "http",
+                url: "127.0.0.1",
+                explorerPort: "9090",
+                apiPort: "9085"
+            }
+        },
+        // Burst
         account: {
             type: Object,
             value: {}
+        },
+        // Qora
+        addresses: {
+            type: Object,
+            value: []
         },
         sendMoneyPrompt: {
             type: Object,
             value: {
                 open: false
             }
+        },
+        addressColors: {
+            type:Array,
+            value: ["#f44336",
+                    "#3f51b5",
+                    "#e91e63",
+                    "#2196f3",
+                    "#4caf50",
+                    "#ff9800",
+                    "#795548",
+                    "#9c27b0",
+                    "#18ffff",
+                    "#ffeb3b"]
+        },
+        addressCount: {
+            type: Number,
+            value: 10
         }
 	},
 	
 	_messageHandler : pluginMessageHandler,
 	
 	_checkActiveRoute : function(item, route){
-		if(route.path == "/burst" + item.url){
+		if(route.path == "/qora" + item.url){
 			return false;
 		}
 		else{
@@ -65,7 +99,7 @@ Polymer({
 	_checkPageNotFound : function(urls, route){
 		var noPage = false;
 		for(var i=0; i < urls.length; i++){
-			if("/burst" + urls[i].url == route.path){
+			if("/qora" + urls[i].url == route.path){
 				noPage=true;
 			}
 		}
@@ -77,12 +111,12 @@ Polymer({
 	},
 	
 	_genIframeUrl : function(url){
-		return "/burst/" + url;
+		return "/qora/" + url;
 	},
     
     _getActiveUrl :  function(routeData, urls){
-        var activeUrl = routeData.currentPluginUrl; 
-        
+        //console.log(routeData);
+        var activeUrl = routeData.currentPluginUrl;
         var activePlugin = {
             url: "404",
             title: "404",
@@ -91,19 +125,23 @@ Polymer({
             parent: false
         };
         
-        console.log("Get active urls...");
-        console.log(urls);
-        console.log(routeData);
+        //console.log("Get active urls...");
+        //console.log(urls);
+        //console.log(routeData);
         
         for(var i=0;i<urls.length;i++){
+            //console.log(urls[i]);
+            //console.log(activeUrl);
             if(activeUrl == urls[i].url){
                 activePlugin = urls[i];
             }
         }
         
-        console.log(activePlugin);
+        //console.log(activePlugin);
         return activePlugin;
     },
+    
+    // CONVERTING TO QORA BABY
     _accountInfo : function(callback){
         if(typeof(this.account.account) == 'undefined'){
             this.account.publicKey = converters.byteArrayToHexString(localSign.getPublicKey(this.passphrase));
@@ -139,7 +177,7 @@ Polymer({
         //console.log(this.passphrase);
         data.accept(data);
     },
-    _cancelSendMoney : function(e){
+    _rejectSendMoney : function(e){
         var data = this.sendMoneyPrompt;
         this.sendMoneyPrompt = {
             open: false
@@ -147,26 +185,19 @@ Polymer({
         data.reject();
     },
     
+    _toggleDrawer: function(e){
+        this.$.appdrawer.toggle();
+    },
+    
 	ready: function(){
-		console.log(this);
+		//console.log(this);
+        //console.log(this.$.appdrawer);
 		window.addEventListener("message", this._messageHandler.bind(this), false);
         
-        this.loginpage.login = function(passphrase){
-            this.loginpage.loggedin = true;
-            this.passphrase = passphrase;
-
-            function loop(){
-                setTimeout(function(){
-                    this._accountInfo(loop.bind(this));
-                }.bind(this), 10000);
-            }
-            this._accountInfo(loop.bind(this));
-            
-            var loginpage = this.loginpage;
-            this.loginpage = {};
-            this.loginpage = loginpage;
-            
-        }.bind(this);
+        // -----------------------
+        // LOGIN FUNCTION
+        // -----------------------
+        this.loginpage.login = login.bind(this);
 	}
 });
 

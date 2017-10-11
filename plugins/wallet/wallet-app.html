@@ -2,31 +2,205 @@
 
 <link rel="stylesheet" href="/client/fonts/roboto.css">
 
+<link rel="import" href="/client/styles/app-theme.html">
+
+<!-- Polymer components -->
+<link rel="import" href="/client/bower_components/paper-card/paper-card.html">
+<link rel="import" href="/client/bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="/client/bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="/client/bower_components/paper-item/paper-item.html">
+<link rel="import" href="/client/bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="/client/bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="/client/bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="/client/bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="/client/bower_components/neon-animation/web-animations.html">
+<link rel="import" href="/client/bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="/client/bower_components/paper-button/paper-button.html">
+<link rel="import" href="/client/bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="/client/bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="/client/bower_components/paper-fab/paper-fab.html">
+
+<!-- Vaandin -->
+<link rel="import" href="/client/bower_components/vaadin-material-theme/vaadin-grid.html">
+<link rel="import" href="/client/bower_components/vaadin-grid/vaadin-grid.html">
+
+
 
 <dom-module id="wallet-app">
-	<style>
-		html, body, p, h1{
-			font-family: "Roboto", sans-serif;
-		}
-	</style>
+    
 	<template>
+        <custom-style>
+            <style is="custom-style"  include="burst-styles">
+                html, body, p, h1{
+                    font-family: "Roboto", sans-serif;
+                }
+                #addresses{
+                    padding:10px;
+                    font-size:14px;
+                    font-weight: 300;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                .address-titles{
+                    line-height: 64px;
+                }
+                .address-balance{
+                    font-size: 64px;
+                    font-weight: 100;
+                    float: right;
+                    text-align: right;
+                }
+                .confirmed-balance{
+                    font-size:14px;
+                    line-height: 14px;
+                }
+                .avatar{
+                    display: inline-block;
+                    box-sizing: border-box;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: #eee;
+                }
+                .paper-table{
+                    width:100%;
+                }
+                .recent-transactions{
+                    padding: 0 12px;
+                }
 
-		<h1>Plugin content</h1>
-		<p>
-			Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-		</p>
-		<p>
-			Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-		</p>
-		<p>
-			Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-		</p>
+                .address-item{
+                    --paper-item-focused: {
+                        background: transparent;
+                    };
+                    --paper-item-focused-before: {
+                        opacity: 0;
+                    };
+                }
+                .show-transactions{
+                    cursor: pointer;
+                }
+                .address-icon{
+                    border-radius: 50%;
+                    border: 5px solid;
+                    /*border-left: 4px solid;*/
+                    padding:8px;
+                }
+                #sendMoneyFab{
+                    position: fixed;
+                    right:32px;
+                    bottom: 32px;
+                }
+                paper-input{
+                    margin:0;
+                }
+                .selectedBalance{
+                    font-size:14px;
+                    display: block;
+                }
+                .selectedBalance .balance{
+                    font-size: 24px;
+                    font-weight: 100;
+                }
+            </style>
+        </custom-style>
+        
+        <div>
+            <div class="layout vertical wrap" id="addresses">
+
+                <paper-card style="width:100%;">
+
+                    <div class="card-content">
+                        <h1>&nbsp;&nbsp;Addresses</h1>
+
+                        <template is="dom-repeat" items="{{addresses}}" indexAs="index">
+
+
+                            <paper-icon-item class="address-item">
+                                <iron-icon class="address-icon" icon="account-balance-wallet" slot="item-icon" style$="border-color:{{item.color}}"></iron-icon>
+                                <paper-item-body two-line><!-- Make a random icon based on address id or whatever -->
+                                    <div>{{item.address}}</div>
+                                    <div secondary><a class="show-transactions" ident$="subitem[[index]]" on-tap="toggle">Toggle recent transactions <!--<iron-icon icon="arrow-drop-down"></iron-icon>--></a></div>
+                                </paper-item-body>
+                                <div style="font-size:42px; font-weight: 100;">{{item.balance}}</div>
+                                <!--<paper-icon-button title="Send money" icon="redo" on-click="_sendMoneyDialog"></paper-icon-button>-->
+                            </paper-icon-item>
+
+                            <iron-collapse class="recent-transactions" ident$="subitem[[index]]">
+
+                                <table class="paper-table">
+                                    <thead>
+                                        <tr>
+                                            <th>From</th>
+                                            <th>Amount</th>
+                                            <th>To</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Qiusbsfieubsice4wrfw4fqed3w33</td>
+                                            <td>12.00</td>
+                                            <td>Qsefw4f9w84ehn98w4hcw98q3dq3d</td>
+                                            <td>12/05/17</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </iron-collapse>
+                            <br>
+                        </template>
+                    </div>
+
+                </paper-card>
+
+
+
+                <!-- SEND MONEYYY -->
+
+                <paper-dialog id="sendMoneyDialog" entry-animation="fade-in-animation" exit-animation="fade-out-animation" with-backdrop>
+                    <h2>Send money</h2>
+
+                    <paper-dropdown-menu label="From" style$="width:500px; border-left: 5px solid {{selectedAddress.color}}">
+                        <paper-listbox style="width: 500px;" slot="dropdown-content" class="dropdown-content" attr-for-selected="address" selected="{{selectedAddress}}">
+                            <template is="dom-repeat" items="{{addresses}}">
+                                <paper-item address="{{item}}">{{_round(item.balance)}} || {{item.address}}</paper-item>
+                            </template>
+                        </paper-listbox>
+                    </paper-dropdown-menu>
+                    <div class="selectedBalance"><span class="balance">{{selectedAddress.balance}} </span>Qora available for transfer from {{selectedAddress.address}}</div>
+                    <paper-input id="amountInput" required label="Amount" type="number" invalid={{validAmount}} value="{{amount}}" error-message="Invalid amount" on-keyup="_checkAmount"></paper-input>
+                    <paper-input label="To" type="text" value="{{recipient}}"></paper-input>
+                    <paper-input label="Fee" type="text" value="{{fee}}"></paper-input>
+
+                    <div class="buttons">
+                        <paper-button dialog-dismiss>Cancel</paper-button>
+                        <!-- dialog-confirm....nah-->
+                        <paper-button autofocus on-tap="_sendMoney">Send</paper-button>
+                    </div>
+                </paper-dialog>
+
+                <paper-fab icon="send" title="heart" id="sendMoneyFab" on-click="_sendMoneyDialog"></paper-fab>
+
+            </div>
+        </div>
+        
 	</template>
 
+    <script src="/client/js/helpers.js"></script>
+    <script src="wallet.js"></script>
 	
-	<script>
-		Polymer({
-			is: "wallet-app"
-		});
-	</script>
 </dom-module>
+
+<!--
+
+/*
+
+,
+//"iron-elements": "^1.0.10",
+//"paper-elements": "^1.0.7",
+//"polymer": "Polymer/polymer#^2.1.1",
+//"app-elements": "^1.0.0"
+
+*/
+
+-->

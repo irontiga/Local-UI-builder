@@ -1,4 +1,4 @@
-Burst = new BurstHelper();
+Burst = new parentHelper();
 
 
 Burst.request(request, [data, callback] )

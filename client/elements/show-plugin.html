@@ -1,9 +1,21 @@
+<script src="/client/bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+
 <link rel="import" href="/client/bower_components/polymer/polymer.html">
 
-<script src="/client/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-
 <dom-module id="show-plugin">
+    
     <template>
+        
+        <style>
+            iframe{
+                width:100%;
+                height:calc(100vh - 68px);
+                border:0;
+                padding:0;
+                margin:0;
+            }
+        </style>
+        
         <iframe src="{{_frameUrl(route, data, subroute, url)}}"></iframe>
     </template>
 
@@ -18,11 +30,16 @@
             },
             
             _frameUrl: function(route, data, subroute, url){
+                //console.log(url);
                 return "/plugins/" + url.page
             },
             
             toJSON: function(object){
                 return JSON.stringify(object);
+            },
+            
+            ready: function(){
+                //console.log(this.url);
             }
         });
     </script>

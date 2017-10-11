@@ -1,6 +1,6 @@
-var Burst = new BurstHelper();
+var parentWindow = new ParentHelper();
 
-Burst.request("registerUrl", {
+parentWindow.request("registerUrl", {
 		url: "transactions",
 		page: "transactions/index.html",
 		title: "Transactions",
@@ -8,6 +8,6 @@ Burst.request("registerUrl", {
 		parent : false
 	},
 	function(response){
-		console.log(response);
+		//console.log(response);
 	}
 );

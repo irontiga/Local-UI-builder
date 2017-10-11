@@ -1,4 +1,4 @@
-Burst = new BurstHelper();
+parentWindow = new ParentHelper();
 
 Polymer({
     is: 'transactions-app',
@@ -14,7 +14,7 @@ Polymer({
     },
 
     ready: function(){
-        Burst.request("getAccountInfo", {}, function(response){
+        parentWindow.request("getAccountInfo", {}, function(response){
             this.account = response;
             console.log(response);
             refreshTransactions.bind(this)();
@@ -23,7 +23,7 @@ Polymer({
 });
 
 function refreshTransactions(){
-    Burst.request("burstApiCall", {
+    parentWindow.request("burstApiCall", {
         requestType: "getAccountTransactions",
         account: this.account.account,
         lastIndex: 25

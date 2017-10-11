@@ -4,16 +4,19 @@ function pluginMessageHandler(event){
     
     //console.log("event");
     //console.log(event)
-	var message = JSON.parse(event.data);
-    var data = message.data;
+	const message = JSON.parse(event.data);
+    const data = message.data;
 	//console.log("Message: ");
     //console.log(message);
     
-	var response = {
+    //this.nodeUrl -- has access
+    
+	let response = {
         requestID: message.requestID
     };
     
     function finish(responseData){
+        // If there is no responseData...eg it's called as finish()
         if(typeof(responseData) == "undefined"){
             responseData = {
                 success : true
@@ -29,7 +32,7 @@ function pluginMessageHandler(event){
             finish();
             break;
 		case "registerUrl":
-			var parent = false;
+			let parent = false;
             if(data.parent){
 				parent = true;
 			}
@@ -44,10 +47,12 @@ function pluginMessageHandler(event){
             
             // ----
             // Dirty updating url array https://www.polymer-project.org/1.0/docs/devguide/model-data#array-mutation
-            var allUrls = this.urls;
+            let allUrls = this.urls;
             this.urls = [];
             this.urls = allUrls;
             // ----
+            
+            //console.log(this.urls);
 			
 			finish();
 			break;
@@ -55,37 +60,80 @@ function pluginMessageHandler(event){
 			finish();
 			break;
         case "getAccountInfo":
-            finish(this.account);
+            let account = this.account;
+            account.success = true;
+            finish(account);
             break;
         case "burstApiCall":
             BurstCall.apiCall(data, finish);
             break;
+        case "qoraApiCall":
+            Qora.apiCall(data, this.qoraNode, finish);
+            break;
+        case "getQoraAddresses":
+            //console.log("getting addresses ready...");
+            const addressIDS = this.addresses.map(function(address, index){
+                let response = {
+                    address: address.address.address,
+                    color: address.color,
+                    index: index,
+                    info: address.info
+                }
+                if(address.info.error){
+                    response.balance = 0
+                }
+                else{
+                    response.balance = address.info.balance.total["0"]
+                }
+                return response;
+            })
+            finish(addressIDS);
+            break;
         case "sendMoney":
+            if(this.sendMoneyPrompt.open){
+                finish({
+                    success: false,
+                    errorMessage: "Send money request already pending."
+                })
+            }
+            console.log(data);
+            
+            // Find the address info
+            let i = 0;
+            while(data.address != this.addresses[i].address.address){
+                i++;
+            }
+            data.sender = this.addresses[i];
+            // Last referene at senderAddress[highest tx number].reference;
+            
+            this.sendMoneyPrompt = {};
             this.sendMoneyPrompt = {
                 open: true,
+                address: data.address,
                 recipient : data.recipient,
-                recipientRS : data.recipientRS,
                 amount: data.amount,
-                message: data.message,
+                fee: data.fee,
                 accept : function(){
-                    BurstCall.sendMoney(data, this.passphrase, finish);
-                },
+                    this.sendMoneyPrompt = {open:false};
+                    Qora.sendMoney(data, this.qoraNode, finish);
+                }.bind(this),
                 reject: function(){
+                    this.sendMoneyPrompt = {open:false};
                     finish({
-                        error : "Rejected!",
-                        errorDescription : "User rejected transaction"
+                        success: false,
+                        errorMessage : "User rejected transaction"
                     });
                 }
             };
-            this.$.sendMoneyPrompt.open();
+            this.$.sendMoneyConfirmDialog.open();
             break;
         case "createAT":
             console.log("Created...not");
             break;
 		default:
 			finish({
-				error : "Unrecognized request",
-                errorDescription : "Unrecognized request '" + message.request + "'"
+				success: false,
+                errorMessage : "Unrecognized request '" + message.request + "'"
 			});
 	}
 };

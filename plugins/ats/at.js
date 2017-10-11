@@ -1,4 +1,4 @@
-Burst = new BurstHelper();
+Burst = new parentHelper();
 
 Polymer({
     is: 'at-app',

@@ -6,91 +6,112 @@
 
 <dom-module id="burst-styles">
     <template>
-        <style is="custom-style" include="iron-flex iron-flex-alignment iron-positioning iron-flex-factors">
-            :root {
-                --primary-text-color: var(--paper-grey-900);
-                --primary-background-color: #ffffff;
-                --secondary-text-color: #737373;
-                --disabled-text-color: #9b9b9b;
-                --divider-color: #dbdbdb;
-                --primary-color: var(--paper-cyan-500);
-                --light-primary-color: var(--paper-cyan-100);
-                --dark-primary-color: var(--paper-cyan-700);
-                --accent-color: var(--paper-pink-a200);
-                --light-accent-color: var(--paper-pink-a100);
-                --dark-accent-color: var(--paper-pink-a400);
-                /* Components */
-                /* paper-drawer-panel */
-                --drawer-menu-color: #ffffff;
-                --drawer-border-color: 1px solid #ccc;
-                --drawer-toolbar-border-color: 1px solid rgba(0, 0, 0, 0.22);
-                /* paper-menu */
-                --paper-menu-background-color: #fff;
-                --menu-link-color: #333;
-            }
+        <custom-style>
+            <style include="iron-flex iron-flex-alignment iron-positioning iron-flex-factors">
+                :root {
+                    /*--primary-text-color: var(--paper-grey-900);
+                    --primary-background-color: #ffffff;
+                    --secondary-text-color: #737373;
+                    --disabled-text-color: #9b9b9b;
+                    --divider-color: #dbdbdb;
+                    --primary-color: var(--paper-cyan-500);
+                    --light-primary-color: var(--paper-cyan-100);
+                    --dark-primary-color: var(--paper-cyan-700);
+                    --accent-color: var(--paper-pink-a200);
+                    --light-accent-color: var(--paper-pink-a100);
+                    --dark-accent-color: var(--paper-pink-a400);*/
 
-            paper-menu {
-                --paper-menu-selected-item: {
-                    color: var(--primary-color);
-                }
-                --paper-menu-focused-item-after: {
-                    background: var(--primary-color);
-                }
-            }
-            paper-menu iron-icon {
-                margin-right: 33px;
-                opacity: 0.54;
-            }
-            paper-menu a {
-                @apply(--layout-horizontal);
-                @apply(--layout-center);
-                text-decoration: none;
-                color: var(--menu-link-color);
-                -webkit-font-smoothing: antialiased;
-                text-rendering: optimizeLegibility;
-                font-size: 14px;
-                font-weight: 400;
-                line-height: 48px;
-                min-height: 48px;
-                padding: 0 16px;
-                text-transform: uppercase;
-                font-family: 'Roboto Mono', monospace;
-                font-weight:bold;
-            }
+                    /* Components */
+                    /* paper-drawer-panel */
 
-            paper-toolbar .title{
-                font-family: 'Roboto Mono', monospace;
-                text-transform: uppercase;
-            }
-            
-            paper-button{
+                    --drawer-menu-color: #ffffff;
+                    --drawer-border-color: 1px solid #ccc;
+                    --drawer-toolbar-border-color: 1px solid rgba(0, 0, 0, 0.22);
+
+                    /* paper-menu */
+                    --paper-menu-background-color: #fff;
+                    --menu-link-color: #333;
+                }
+
+                paper-listbox {
+                    --paper-menu-selected-item: {
+                        color: var(--primary-color);
+                    }
+                    --paper-menu-focused-item-after: {
+                        background: var(--primary-color);
+                    }
+                }
+                paper-listbox iron-icon {
+                    margin-right: 33px;
+                    opacity: 0.54;
+                }
+                paper-listbox a {
+                    @apply(--layout-horizontal);
+                    @apply(--layout-center);
+                    text-decoration: none;
+                    color: var(--menu-link-color);
+                    -webkit-font-smoothing: antialiased;
+                    text-rendering: optimizeLegibility;
+                    font-size: 14px;
+                    font-weight: 400;
+                    line-height: 48px;
+                    min-height: 48px;
+                    padding: 0 16px;
+                    text-transform: uppercase;
+                    /*font-family: 'Roboto Mono', monospace;
+                    font-weight:bold;*/
+                }
+
+                paper-toolbar .title{
+                    font-family: 'Roboto Mono', monospace;
+                    text-transform: uppercase;
+                }
+
+                /*paper-button{
                 background: var(--accent-color);
                 color: #fff;
                 font-size:14px;
                 padding: 2px 16px;
                 height: 32px;
-            }
-            
-            paper-button.red-button{
-                background: var(--paper-red-500);
-            }
-            paper-button.green-button{
-                background: var(--paper-green-500);
-            }
-            
-            paper-fab.primary {
-                --paper-fab-background: var(--primary-color);
-                --paper-fab-keyboard-focus-background: var(--light-primary-color);
-            }
-            
-            paper-card{
-                --paper-card-header-text{
-                    font-family: "Roboto Mono", monospace;
+                }*/
+
+                paper-button.red-button{
+                    background: var(--paper-red-500);
                 }
-            }
-            paper-tabs{
-                --paper-tabs-selection-bar-color: var(--accent-color);
-            }
-        </style>
+                paper-button.green-button{
+                    background: var(--paper-green-500);
+                }
+
+                paper-fab.primary {
+                    --paper-fab-background: var(--primary-color);
+                    --paper-fab-keyboard-focus-background: var(--light-primary-color);
+                }
+
+                paper-card{
+                    --paper-card-header-text{
+                        font-family: "Roboto Mono", monospace;
+                    }
+                }
+                paper-tabs{
+                    --paper-tabs-selection-bar-color: var(--accent-color);
+                }
+
+                h1,h3{
+                    font-weight:400;
+                }
+                a{
+                    text-decoration: none;
+                }
+                
+                
+                
+                
+                
+                
+                
+                
+            </style>
+        </custom-style>
+        
     </template>
 </dom-module>

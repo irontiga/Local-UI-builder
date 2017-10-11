@@ -1,0 +1,70 @@
+<paper-drawer-panel>
+
+    <!--<paper-header-panel fixed drawer>-->
+    <div slot="drawer" fixed>
+        <paper-toolbar>
+            <paper-icon-button slot="top" icon="menu" on-tap="menuAction"></paper-icon-button>
+            <div slot="top" class="title">{{account.accountRS}}</div>
+            <paper-icon-button slot="top" icon="more-vert" on-tap="moreAction"></paper-icon-button>
+
+        </paper-toolbar>
+        <paper-menu>
+            <template is="dom-repeat" items="{{urls}}">
+                <template is="dom-if" if="menus.length > 0">
+                    <template is="dom-repeat" items="{{menus}}">
+                        <a href="{{_genIframeUrl(item.url)}}">{{item.title}}</a>
+                    </template>
+                </template>
+
+                <template is="dom-if" if="menus.length == 0">
+                    <paper-item>
+                        <a style="display:block" is="pushstate-anchor" href="{{_genIframeUrl(item.url)}}">
+                            {{item.title}}
+                            <paper-ripple></paper-ripple>
+                        </a>
+                    </paper-item>
+                </template>
+            </template>
+        </paper-menu>
+    </div>
+    <!--</paper-header-panel>-->
+
+    <div slot="main">
+        <!--<paper-header-panel main>-->
+        <paper-toolbar>
+            <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+            <span class="title">{{activeUrl.title}}</span>
+            <paper-icon-button icon="refresh"></paper-icon-button>
+
+            <paper-menu-button horizontal-align="right">
+                <paper-icon-button icon="add" class="dropdown-trigger">+</paper-icon-button>
+                <paper-menu class="dropdown-content">
+                    <paper-item>Share</paper-item>
+                    <paper-item>Settings</paper-item>
+                    <paper-item>Help</paper-item>
+                </paper-menu>
+            </paper-menu-button>
+
+            <span>{{account.balance}} Burst</span>
+        </paper-toolbar>
+
+        <template is="dom-if" if="{{loginpage.loggedin}}">
+            <show-plugin route="{{route}}" data="{{routeData}}" subroute="{{subroute}}" url="{{activeUrl}}"></show-plugin>
+        </template>
+
+        <paper-dialog opened="{{sendMoneyPrompt.open}}" id="sendMoneyPrompt" modal exit-animation="fade-out-animation" entry-animation="scale-up-animation">
+            <h2>Send money?</h2>
+            <paper-dialog-scrollable>
+                Send {{sendMoneyPrompt.amount}} Burst to {{sendMoneyPrompt.recipientRS}}?
+            </paper-dialog-scrollable>
+            <div class="layout horizontal">
+                <span class="flex"></span>
+                <paper-button class="red-button" dialog-dismis on-tap="_cancelSendMoney">Reject</paper-button>
+                <paper-button class="green-button" on-tap="_acceptSendMoney" dialog-confirm autofocus>Accept</paper-button>
+            </div>
+        </paper-dialog>
+
+    </div>
+    <!--</paper-header-panel>-->
+
+</paper-drawer-panel>

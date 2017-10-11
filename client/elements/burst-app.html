@@ -1,6 +1,6 @@
-<link rel="import" href="/client/bower_components/polymer/polymer.html">
+<script src="/client/bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
-<script src="/client/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+<link rel="import" href="/client/bower_components/polymer/polymer.html">
 
 <!-- POLYMER ELEMENTS -->
 <link rel="import" href="/client/bower_components/paper-material/paper-material.html">
@@ -8,7 +8,7 @@
 <link rel="import" href="/client/bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="/client/bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="/client/bower_components/paper-scroll-header-panel/paper-scroll-header-panel.html">
-<link rel="import" href="/client/bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="/client/bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="/client/bower_components/paper-item/paper-item.html">
 <link rel="import" href="/client/bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="/client/bower_components/paper-icon-button/paper-icon-button.html">
@@ -22,10 +22,16 @@
 <link rel="import" href="/client/bower_components/neon-animation/animations/scale-up-animation.html">
 <link rel="import" href="/client/bower_components/neon-animation/animations/fade-out-animation.html">
 <link rel="import" href="/client/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="/client/bower_components/neon-animation/web-animations.html">
+<link rel="import" href="/client/bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+
+<link rel="import" href="/client/bower_components/app-layout/app-layout.html">
 
 <!-- Router -->
 <link rel="import" href="/client/bower_components/app-route/app-location.html">
 <link rel="import" href="/client/bower_components/app-route/app-route.html">
+
+<link rel="import" href="/client/bower_components/paper-styles/shadow.html">
 
 <!-- Burst styles -->
 <link rel="stylesheet" href="/client/fonts/roboto.css">
@@ -37,103 +43,176 @@
 <link rel="import" href="/client/elements/login-page.html">
 
 <dom-module id="burst-app">
-    <style is="custom-style"  include="burst-styles iron-flex iron-flex-alignment iron-positioning iron-flex-factors">
-        paper-toolbar{
-            --paper-toolbar-title: {
-                left:0;
-                margin-left:0;
-                font-size:17px;
-            }
-        }
-    </style>
 	<template>
+        <custom-style>
+            <style is="custom-style" include="burst-styles iron-flex iron-flex-alignment iron-positioning iron-flex-factors">
+                paper-toolbar{
+                    --paper-toolbar-title: {
+                        left:0;
+                        margin-left:0;
+                        font-size:17px;
+                    }
+                }
+
+                app-drawer{
+                    @apply --shadow-elevation-4dp;
+                }
+                
+                app-header{
+                    background: #fff;
+                    @apply --shadow-elevation-2dp;
+                }
+                
+                
+                @media screen and (min-width: 640px) {
+                    .show-only-mobile{
+                        display: none;
+                    }
+                }
+                .qora-title{
+                    font-weight: 100;
+                }
+                .deny{
+                    color:red;
+                }
+                .confirm{
+                    color:green;
+                }
+            </style>
+        </custom-style>
+        
+        
         <app-location route="{{route}}"></app-location>
         <app-route
                    route="{{route}}"
-                   pattern="/burst/:currentPluginUrl"
+                   pattern="/qora/:currentPluginUrl"
                    data="{{routeData}}"
                    tail="{{subroute}}">
         </app-route>
 		
-        <login-page loginpage="{{loginpage}}"></login-page>
+        <!-- Store settings -->
+        <app-localstorage-document key="qoraNode" data="{{qoraNode}}"></app-localstorage-document>
+        <app-localstorage-document key="addressCount" data="{{addressCount}}"></app-localstorage-document>
+        
+        <!-- LOGIN PAGE -->
+        <login-page loginpage="{{loginpage}}" node="{{qoraNode}}" address-count="{{addressCount}}"></login-page>
+        
 		
-		<paper-drawer-panel>
+        <app-header-layout>
 
-			<paper-header-panel fixed drawer>
+            <app-header slot="header">
+                <app-toolbar>
+                    <paper-icon-button icon="menu" drawer-toggle on-click="_toggleDrawer" class="show-only-mobile"></paper-icon-button>
+                    <div main-title><span class="qora-title">QORA | </span> {{activeUrl.title}}</div>
+                    <paper-icon-button icon="settings"></paper-icon-button>
+                </app-toolbar>
+            </app-header>
 
-				<paper-toolbar>
-                    <span class="title"><small>{{account.accountRS}}</small></span>
-				</paper-toolbar>
-				<paper-menu>
-					<template is="dom-repeat" items="{{urls}}">
-                        <template is="dom-if" if="menus.length > 0">
-                            <template is="dom-repeat" items="menus">
-                                <a href="{{_genIframeUrl(item.url)}}">{{item.title}}</a>
+            <app-drawer-layout>
+
+                <app-drawer swipe-open slot="drawer" id="appdrawer">
+                    <app-header-layout has-scrolling-region>
+
+                        <app-header fixed slot="header">
+                            <app-toolbar>
+                                <div main-title>Qora</div>
+                            </app-toolbar>
+                        </app-header>
+
+                        <paper-listbox>
+                            <template is="dom-repeat" items="{{urls}}">
+                                <template is="dom-if" if="menus.length > 0">
+                                    <template is="dom-repeat" items="{{menus}}">
+                                        <a href="{{_genIframeUrl(item.url)}}">{{item.title}}</a>
+                                    </template>
+                                </template>
+
+                                <template is="dom-if" if="menus.length == 0">
+                                    <paper-item>
+                                        <a style="display:block" is="pushstate-anchor" href="{{_genIframeUrl(item.url)}}">
+                                            {{item.title}}
+                                            <paper-ripple></paper-ripple>
+                                        </a>
+                                    </paper-item>
+                                </template>
                             </template>
-                        </template>
-                        
-                        <template is="dom-if" if="menus.length == 0">
-                            <paper-item>
-                                <paper-ripple></paper-ripple>
-                                <a style="display:block" is="pushstate-anchor" href="{{_genIframeUrl(item.url)}}">{{item.title}}</a>
-                            </paper-item>
-                        </template>
-					</template>
-				</paper-menu>
+                        </paper-listbox>
 
-			</paper-header-panel>
-
-			<paper-header-panel main>
-				<paper-toolbar>
-					<paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
-					<span class="title">{{activeUrl.title}}</span>
-					<paper-icon-button icon="refresh"></paper-icon-button>
-
-					<paper-menu-button horizontal-align="right">
-						<paper-icon-button icon="add" class="dropdown-trigger">+</paper-icon-button>
-						<paper-menu class="dropdown-content">
-							<paper-item>Share</paper-item>
-							<paper-item>Settings</paper-item>
-							<paper-item>Help</paper-item>
-						</paper-menu>
-					</paper-menu-button>
-                    
-                    <span>{{account.balance}} Burst</span>
-				</paper-toolbar>
-				
+                    </app-header-layout>
+                </app-drawer>
+                
+                
+                <!-- PLUGIN IFRAMEEEE -->
+                <!---------------------->
                 <template is="dom-if" if="{{loginpage.loggedin}}">
                     <show-plugin route="{{route}}" data="{{routeData}}" subroute="{{subroute}}" url="{{activeUrl}}"></show-plugin>
                 </template>
                 
-                <paper-dialog opened="{{sendMoneyPrompt.open}}" id="sendMoneyPrompt" modal exit-animation="fade-out-animation" entry-animation="scale-up-animation">
-                    <h2>Send money?</h2>
-                    <paper-dialog-scrollable>
-                        Send {{sendMoneyPrompt.amount}} Burst to {{sendMoneyPrompt.recipientRS}}?
-                    </paper-dialog-scrollable>
-                    <div class="layout horizontal">
-                        <span class="flex"></span>
-                        <paper-button class="red-button" dialog-dismis on-tap="_cancelSendMoney">Reject</paper-button>
-                        <paper-button class="green-button" on-tap="_acceptSendMoney" dialog-confirm autofocus>Accept</paper-button>
-                    </div>
-                </paper-dialog>
                 
-			</paper-header-panel>
 
-		</paper-drawer-panel>
+            </app-drawer-layout>
+            
+            
+
+        </app-header-layout>
+        
+        
+        <!-- SEND MONEY CONFIRM DIALOG -->
+        <!-- with-backdrop -->
+        <paper-dialog id="sendMoneyConfirmDialog" entry-animation="fade-in-animation" exit-animation="fade-out-animation" modal>
+            <h2>Send money request</h2>
+
+            <table>
+                <tbody>
+                    <tr><td>From</td><td>{{sendMoneyPrompt.address}}</td></tr>
+                    <tr><td>Amount(Qora)&nbsp;</td><td>{{sendMoneyPrompt.amount}}</td></tr>
+                    <tr><td>To</td><td>{{sendMoneyPrompt.recipient}}</td></tr>
+                    <tr><td>Fee</td><td>{{sendMoneyPrompt.fee}}</td></tr>
+                </tbody>
+            </table>
+
+
+            <div class="buttons">
+                <paper-button autofocus dialog-dismiss on-tap="_rejectSendMoney" class="deny">Deny</paper-button>
+                <paper-button dialog-confirm on-tap="_acceptSendMoney" class="confirm">Confirm</paper-button>
+            </div>
+        </paper-dialog>
+        
+		
 		<!--<iframe id="plugin-js-loader" src="/client/plugin-js.html"></iframe>-->
 	</template>
     
     
     
-    
+    <!-- Won't be needing these for Qora.... -->
     <script src="/client/js/localSigningDeps.js"></script>
     <script src="/client/js/localSigning.js"></script>
     <script src="/client/js/burstCalls.js"></script>
+    <!-- QORA *down arrow* -->
+    <script src="/client/js/qora-proto/nacl-fast.js"></script>
+    <script src="/client/js/qora-proto/Base58.js"></script>
+    <script src="/client/js/qora-proto/sha256.js"></script>
+    <script src="/client/js/qora-proto/ripemd160.js"></script>
+    <script src="/client/js/qora-proto/qora.js"></script>
+    <!-- Me Qora -->
+    <script src="/client/js/qoraHelper.js"></script>
+    <script>
+        // From qoraHelper.js....has API interactions
+        Qora = new QoraCalls();
+    </script>
+    
+    <script src="/client/js/sendMoneyQora.js"></script>
+    <!-- Wants jQuery...-->
+    <!-- <script src="/client/js/qora-proto/common.js"></script> -->
+    <script src="/client/js/qora-proto/nacl-fast.js"></script>
+    <script src="/client/js/qora-proto/brainwallet.js"></script>
+    
     <script>
         var localSign = new localSigning();
         var BurstCall = new BurstCalls();
     </script>
 	<script src="/client/js/messageHandler.js"></script>
+    <script src="/client/js/login.js"></script>
 	<script src="/client/js/app.js"></script>
     <script src="/client/js/plugin-loader.js"></script>
 </dom-module>

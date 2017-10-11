@@ -2,7 +2,57 @@
 // Author: irontiga
 // License: GPL-V3.0
 
-function BurstHelper(){
+
+// REWRITE ES6 CLASS WHOOOOP
+class ParentHelper{
+    constructor(){
+        // Handler for responses
+        this._pendingRequests = {};
+        window.addEventListener("message", function(event){
+
+            //console.log(event);
+
+            var data = JSON.parse(event.data);
+
+            var id = data.requestID;
+
+            //console.log(data)
+
+            if(this._pendingRequests[id]){
+
+                // call callback
+                this._pendingRequests[id](data.data);
+
+                //console.log(pendingRequests);
+
+                delete this._pendingRequests[id];	
+            }
+
+        }.bind(this));
+    }
+    
+    request(request, data, callback){
+        var requestID = Math.random().toString(36).substr(2, 10);
+        var messageRequest = JSON.stringify({
+            request: request,
+            requestID : requestID,
+            data: data
+        });
+
+        window.parent.postMessage(messageRequest, '*');
+
+
+        this._pendingRequests[requestID] = callback;
+    }
+    
+    changeUrl(url){
+        // Update the url, and therefor the active plugin
+        window.location.replace(url);
+    }
+}
+
+/* OLD version...not as classy
+function parentHelper(){
 	
 	// Handler for responses
 	var pendingRequests = {};
@@ -50,9 +100,9 @@ function BurstHelper(){
 		window.location.replace(url);
 	};
 	
-}
+}*/
 
-//var Burst = new BurstHelper();
+//var Burst = new parentHelper();
 
 
 // // // // // //
